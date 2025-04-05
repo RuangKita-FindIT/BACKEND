@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String    @id @default(uuid()) @map("user_id")
+  name                  String
+  username              String?   @unique
+  email                 String    @unique
+  phoneNumber           String?   @map("phone_number")
+  bio                   String?
+  location              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  textSize              String?   @map("accessibility_preferences_text_size")
+  highContrastEnabled   Boolean?  @default(false) @map("accessibility_preferences_high_contrast_enabled")
+  languagePreference    String?   @map("language_preference")  
+
+  ownedCommunities      Community[]  @relation("CommunityOwner")
+  posts                 Post[]
+  replies               Reply[]
+  resources             Resource[]
+  partnershipRequests   PartnershipRequest[] @relation("UMKMPartner")
+}
+
+// model BlacklistedToken {
+//   id        String   @id @default(uuid())
+//   token     String   @unique
+//   expiresAt DateTime
+//   createdAt DateTime @default(now())
+// }
+
+model Community {
+  id                    String    @id @default(uuid()) @map("community_id")
+  ownerId               String    @map("owner_id")
+  name                  String
+  description           String
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  status                CommunityStatus @default(active)
+  visibility            CommunityVisibility @default(public)
+  categoryId            String    @map("category_id")
+  location              String?
+  memberCount           Int       @default(0) @map("member_count")
+  activeMemberCount     Int       @default(0) @map("active_member_count")
+  verifiedStatus        Boolean   @default(false) @map("verified_status")
+  sdgTags               String[]  @map("sdg_tags")
+  accessibilityFeatures String[]  @map("accessibility_features")
+  language              String?
+
+  owner                 User      @relation("CommunityOwner", fields: [ownerId], references: [id])
+  category              Category  @relation(fields: [categoryId], references: [id])
+  posts                 Post[]
+  replies               Reply[]
+  resources             Resource[]
+  partnershipRequests   PartnershipRequest[]
+}
+
+model Post {
+  id            String    @id @default(uuid()) @map("post_id")
+  communityId   String    @map("community_id")
+  userId        String    @map("user_id")
+  content       String
+  imageUrl      String?   @map("image_url")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  community     Community @relation(fields: [communityId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+  replies       Reply[]
+}
+
+model Reply {
+  id            String    @id @default(uuid()) @map("replies_id")
+  postId        String    @map("post_id")
+  communityId   String    @map("community_id")
+  userId        String    @map("user_id")
+  content       String
+  imageUrl      String?   @map("image_url")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  post          Post      @relation(fields: [postId], references: [id])
+  community     Community @relation(fields: [communityId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model Resource {
+  id            String    @id @default(uuid()) @map("resource_id")
+  communityId   String    @map("community_id")
+  userId        String    @map("user_id")
+  title         String
+  description   String
+  fileUrl       String    @map("file_url")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  community     Community @relation(fields: [communityId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id            String    @id @default(uuid()) @map("category_id")
+  name          String
+  description   String
+
+  communities   Community[]
+}
+
+model PartnershipRequest {
+  id                      String    @id @default(uuid()) @map("request_id")
+  communityId             String    @map("community_id")
+  umkmId                  String    @map("umkm_id")
+  title                   String
+  description             String
+  proposedPartnershipType String    @map("proposed_partnership_type")
+  status                  RequestStatus @default(pending)
+  submissionDate          DateTime  @default(now()) @map("submission_date")
+  responseDate            DateTime? @map("response_date")
+  notes                   String?
+
+  community               Community @relation(fields: [communityId], references: [id])
+  umkm                    User      @relation("UMKMPartner", fields: [umkmId], references: [id])
+}
+
+enum CommunityStatus {
+  active
+  inactive
+}
+
+enum CommunityVisibility {
+  public
+  private
+}
+
+enum RequestStatus {
+  pending
+  accepted
+  rejected
+}
