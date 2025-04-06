@@ -4,6 +4,7 @@ import { generateState } from "oslo/oauth2";
 import { googleOAuth2Client, getGoogleUser } from "../config/auth.config";
 import { responseUtils } from "../utils/response";
 import { PrismaClient } from "@prisma/client";
+import { generateToken } from "../utils/jwt";
 
 const prisma = new PrismaClient();
 const authRoutes = new Hono();
@@ -61,7 +62,12 @@ authRoutes.get("/google/callback", async (c) => {
       });
     }
 
-    return responseUtils(c, "Authenticated successfully", 200, { user });
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    return responseUtils(c, "Authenticated successfully", 200, { user, token });
   } catch (error) {
     console.error("OAuth callback error:", error);
     return responseUtils(c, "Authentication failed", 500);
