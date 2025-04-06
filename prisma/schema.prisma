@@ -59,6 +59,7 @@ model Community {
   replies               Reply[]
   resources             Resource[]
   partnershipRequests   PartnershipRequest[]
+  Gathering             Gathering[]
 }
 
 model Post {
@@ -88,6 +89,27 @@ model Reply {
   post          Post      @relation(fields: [postId], references: [id])
   community     Community @relation(fields: [communityId], references: [id])
   user          User      @relation(fields: [userId], references: [id])
+}
+
+model Gathering {
+  id                String    @id @default(uuid()) @map("gathering_id")
+  communityId       String    @map("community_id")
+  title             String
+  description       String
+  location          String?
+  startDate         DateTime  @map("start_date")
+  endDate           DateTime  @map("end_date")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  status            GatheringStatus @default(planned)
+  capacity          Int       @default(0)
+  attendeeCount     Int       @default(0) @map("attendee_count")
+  imageUrl          String?   @map("image_url")
+  accessibilityInfo String?   @map("accessibility_info")
+  virtualMeetingUrl String?   @map("virtual_meeting_url")
+  
+  // Relations
+  community         Community @relation(fields: [communityId], references: [id])
 }
 
 model Resource {
@@ -142,4 +164,11 @@ enum RequestStatus {
   pending
   accepted
   rejected
+}
+
+enum GatheringStatus {
+  planned
+  ongoing
+  completed
+  cancelled
 }

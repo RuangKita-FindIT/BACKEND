@@ -7,6 +7,9 @@ CREATE TYPE "CommunityVisibility" AS ENUM ('public', 'private');
 -- CreateEnum
 CREATE TYPE "RequestStatus" AS ENUM ('pending', 'accepted', 'rejected');
 
+-- CreateEnum
+CREATE TYPE "GatheringStatus" AS ENUM ('planned', 'ongoing', 'completed', 'cancelled');
+
 -- CreateTable
 CREATE TABLE "User" (
     "user_id" TEXT NOT NULL,
@@ -75,6 +78,27 @@ CREATE TABLE "Reply" (
 );
 
 -- CreateTable
+CREATE TABLE "Gathering" (
+    "gathering_id" TEXT NOT NULL,
+    "community_id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "location" TEXT,
+    "start_date" TIMESTAMP(3) NOT NULL,
+    "end_date" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "status" "GatheringStatus" NOT NULL DEFAULT 'planned',
+    "capacity" INTEGER NOT NULL DEFAULT 0,
+    "attendee_count" INTEGER NOT NULL DEFAULT 0,
+    "image_url" TEXT,
+    "accessibility_info" TEXT,
+    "virtual_meeting_url" TEXT,
+
+    CONSTRAINT "Gathering_pkey" PRIMARY KEY ("gathering_id")
+);
+
+-- CreateTable
 CREATE TABLE "Resource" (
     "resource_id" TEXT NOT NULL,
     "community_id" TEXT NOT NULL,
@@ -139,6 +163,9 @@ ALTER TABLE "Reply" ADD CONSTRAINT "Reply_community_id_fkey" FOREIGN KEY ("commu
 
 -- AddForeignKey
 ALTER TABLE "Reply" ADD CONSTRAINT "Reply_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Gathering" ADD CONSTRAINT "Gathering_community_id_fkey" FOREIGN KEY ("community_id") REFERENCES "Community"("community_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Resource" ADD CONSTRAINT "Resource_community_id_fkey" FOREIGN KEY ("community_id") REFERENCES "Community"("community_id") ON DELETE RESTRICT ON UPDATE CASCADE;
