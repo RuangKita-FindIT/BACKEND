@@ -28,13 +28,6 @@ model User {
   partnershipRequests   PartnershipRequest[] @relation("UMKMPartner")
 }
 
-// model BlacklistedToken {
-//   id        String   @id @default(uuid())
-//   token     String   @unique
-//   expiresAt DateTime
-//   createdAt DateTime @default(now())
-// }
-
 model Community {
   id                    String    @id @default(uuid()) @map("community_id")
   ownerId               String    @map("owner_id")
@@ -108,7 +101,6 @@ model Gathering {
   accessibilityInfo String?   @map("accessibility_info")
   virtualMeetingUrl String?   @map("virtual_meeting_url")
   
-  // Relations
   community         Community @relation(fields: [communityId], references: [id])
 }
 

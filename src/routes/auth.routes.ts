@@ -5,6 +5,7 @@ import { googleOAuth2Client, getGoogleUser } from "../config/auth.config";
 import { responseUtils } from "../utils/response";
 import { PrismaClient } from "@prisma/client";
 import { generateToken } from "../utils/jwt";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 const prisma = new PrismaClient();
 const authRoutes = new Hono();
@@ -71,6 +72,15 @@ authRoutes.get("/google/callback", async (c) => {
   } catch (error) {
     console.error("OAuth callback error:", error);
     return responseUtils(c, "Authentication failed", 500);
+  }
+});
+
+authRoutes.post("/logout", authMiddleware, async (c) => {
+  try {
+    return responseUtils(c, "Logout successful", 200);
+  } catch (error) {
+    console.error("Logout error:", error);
+    return responseUtils(c, "Logout failed", 500);
   }
 });
 
